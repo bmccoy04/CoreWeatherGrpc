@@ -1,0 +1,46 @@
+@page "/CurrentConditionsApiCall"
+
+@using CoreWeatherGrpc.Blazor.Data
+@inject CurrentConditionsApiService CurrentConditionsApiService
+
+<h1>Current Conditions</h1>
+
+<p>Current Conditions</p>
+
+@if (currentConditions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <td>Time</td>
+                <th>Temp.</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var currentCondition in currentConditions)
+            {
+                <tr>
+                    <td>@currentCondition.name</td>
+                    <td>@currentCondition.time</td>
+                    <td>@currentCondition.temperature</td>
+                    <td>@currentCondition.description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    IEnumerable<CurrentConditionsDto> currentConditions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentConditions = await CurrentConditionsApiService.Get();
+    }
+}
