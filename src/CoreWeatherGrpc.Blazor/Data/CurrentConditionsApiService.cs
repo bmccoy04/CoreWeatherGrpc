@@ -4,9 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using CoreWeatherGrpc.Worker;
 using Google.Protobuf.Collections;
+using Grpc.Core;
 using Grpc.Net.Client;
 
 namespace CoreWeatherGrpc.Blazor.Data
@@ -42,6 +44,16 @@ namespace CoreWeatherGrpc.Blazor.Data
             var reply = await client.GetCurrentConditionsAsync(new CurrentConditionsRequest(){});
 
             return reply.CurrentConditions;
+        }
+
+        public IAsyncEnumerable<CurrentConditionsReply> GetStreamingWeather(CancellationToken token)
+        {
+            var channel = GrpcChannel.ForAddress("http://localhost:5004");
+
+            var client = new CurrentConditions.CurrentConditionsClient(channel);
+
+            return client.GetCurrentConditionStream(new CurrentConditionsRequest(), cancellationToken: token)
+                .ResponseStream.ReadAllAsync();
         }
 
     }

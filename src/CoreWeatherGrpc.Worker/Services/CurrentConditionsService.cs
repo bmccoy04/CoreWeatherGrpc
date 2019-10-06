@@ -19,17 +19,18 @@ namespace CoreWeatherGrpc.Worker
 
         public override async Task<CurrentConditionReply> GetCurrentCondition(CurrentConditionRequest request, ServerCallContext context)
         {
-            var client = new HttpClient();   
+            _logger.LogWarning("Get current condition called");
+            var client = new HttpClient();
 
             var response = await client.GetAsync("https://core-weather-api.azurewebsites.net/api/v1/current-conditions/" + request.PlanetId);
 
             var retVal = await response.Content.ReadAsStringAsync();
-            
+
             // New Serializer!!!!
             var jsonSerializerOptions = new JsonSerializerOptions();
             jsonSerializerOptions.PropertyNameCaseInsensitive = true;
 
-            var currentConditionReply =  JsonSerializer.Deserialize<CurrentConditionReply>(retVal, jsonSerializerOptions);
+            var currentConditionReply = JsonSerializer.Deserialize<CurrentConditionReply>(retVal, jsonSerializerOptions);
 
             var currentConditionsReply = new CurrentConditionsReply();
 
@@ -38,17 +39,19 @@ namespace CoreWeatherGrpc.Worker
 
         public override async Task<CurrentConditionsReply> GetCurrentConditions(CurrentConditionsRequest request, ServerCallContext context)
         {
-            var client = new HttpClient();   
+            _logger.LogWarning("Get current conditions called");
+
+            var client = new HttpClient();
 
             var response = await client.GetAsync("https://core-weather-api.azurewebsites.net/api/v1/current-conditions");
 
             var retVal = await response.Content.ReadAsStringAsync();
-            
+
             // New Serializer!!!!
             var jsonSerializerOptions = new JsonSerializerOptions();
             jsonSerializerOptions.PropertyNameCaseInsensitive = true;
 
-            var conditions =  JsonSerializer.Deserialize<IEnumerable<CurrentCondition>>(retVal, jsonSerializerOptions);
+            var conditions = JsonSerializer.Deserialize<IEnumerable<CurrentCondition>>(retVal, jsonSerializerOptions);
 
             var currentConditions = new Google.Protobuf.Collections.RepeatedField<CurrentCondition>();
             currentConditions.AddRange(conditions);
@@ -61,28 +64,32 @@ namespace CoreWeatherGrpc.Worker
 
         public override async Task GetCurrentConditionStream(CurrentConditionsRequest request, IServerStreamWriter<CurrentConditionsReply> responseStream, ServerCallContext context)
         {
-            _logger.LogInformation("Background task is running");
-            var client = new HttpClient();   
 
-            var response = await client.GetAsync("https://core-weather-api.azurewebsites.net/api/v1/current-conditions");
+            while (!context.CancellationToken.IsCancellationRequested)
+            {
+                _logger.LogWarning("Background task is running");
 
-            var retVal = await response.Content.ReadAsStringAsync();
-            
-            // New Serializer!!!!
-            var jsonSerializerOptions = new JsonSerializerOptions();
-            jsonSerializerOptions.PropertyNameCaseInsensitive = true;
+                var client = new HttpClient();
 
-            var conditions =  JsonSerializer.Deserialize<IEnumerable<CurrentCondition>>(retVal, jsonSerializerOptions);
+                var response = await client.GetAsync("https://core-weather-api.azurewebsites.net/api/v1/current-conditions");
 
-            var currentConditions = new Google.Protobuf.Collections.RepeatedField<CurrentCondition>();
-            currentConditions.AddRange(conditions);
+                var retVal = await response.Content.ReadAsStringAsync();
 
-            var currentConditionsReply = new CurrentConditionsReply();
-            currentConditionsReply.CurrentConditions.AddRange(currentConditions);
+                // New Serializer!!!!
+                var jsonSerializerOptions = new JsonSerializerOptions();
+                jsonSerializerOptions.PropertyNameCaseInsensitive = true;
 
-            await responseStream.WriteAsync(currentConditionsReply);
-            await Task.Delay(TimeSpan.FromSeconds(2));
+                var conditions = JsonSerializer.Deserialize<IEnumerable<CurrentCondition>>(retVal, jsonSerializerOptions);
 
+                var currentConditions = new Google.Protobuf.Collections.RepeatedField<CurrentCondition>();
+                currentConditions.AddRange(conditions);
+
+                var currentConditionsReply = new CurrentConditionsReply();
+                currentConditionsReply.CurrentConditions.AddRange(currentConditions);
+
+                await responseStream.WriteAsync(currentConditionsReply);
+                await Task.Delay(TimeSpan.FromSeconds(2));
+            }
         }
     }
 }
