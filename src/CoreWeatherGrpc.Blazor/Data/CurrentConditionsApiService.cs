@@ -5,6 +5,9 @@ using System.Linq;
 using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CoreWeatherGrpc.Worker;
+using Google.Protobuf.Collections;
+using Grpc.Net.Client;
 
 namespace CoreWeatherGrpc.Blazor.Data
 {
@@ -26,6 +29,21 @@ namespace CoreWeatherGrpc.Blazor.Data
             // New Serializer!!!!
             return JsonSerializer.Deserialize<IEnumerable<CurrentConditionsDto>>(retVal);
         }
+
+
+        public async Task<RepeatedField<CurrentCondition>> GetGrpc()
+        {
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+
+            // The port number(5001) must match the port of the gRPC server.
+            var channel = GrpcChannel.ForAddress("http://localhost:5004");
+
+            var client = new CurrentConditions.CurrentConditionsClient(channel);
+            var reply = await client.GetCurrentConditionsAsync(new CurrentConditionsRequest(){});
+
+            return reply.CurrentConditions;
+        }
+
     }
 
     public class CurrentConditionsDto

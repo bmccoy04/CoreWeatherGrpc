@@ -1,0 +1,50 @@
+
+@page "/CurrentConditionsServiceCall"
+
+@using CoreWeatherGrpc.Worker;
+@using Google.Protobuf.Collections;
+@using CoreWeatherGrpc.Blazor.Data;
+
+@inject CurrentConditionsApiService CurrentConditionsApiService
+
+<h1>Current Conditions</h1>
+
+<p>Current Conditions</p>
+
+@if (currentConditions == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <td>Time</td>
+                <th>Temp.</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var currentCondition in currentConditions)
+            {
+                <tr>
+                    <td>@currentCondition.Name</td>
+                    <td>@currentCondition.Time</td>
+                    <td>@currentCondition.Temperature</td>
+                    <td>@currentCondition.Description</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    RepeatedField<CurrentCondition> currentConditions;
+
+    protected override async Task OnInitializedAsync()
+    {
+        currentConditions = await CurrentConditionsApiService.GetGrpc();
+    }
+}
