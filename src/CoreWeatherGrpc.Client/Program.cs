@@ -11,19 +11,20 @@ namespace CoreWeatherGrpc.Client
         static async Task Main(string[] args)
         {
 
-            var client = new HttpClient();
-            //client.BaseAddress = "https://core-weather-api.azurewebsites.net/api/v1/";
-            
-            var response = await client.GetAsync("https://core-weather-api.azurewebsites.net/api/v1/current-conditions");
+            AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
 
-            var s = await response.Content.ReadAsStringAsync();
+            // The port number(5001) must match the port of the gRPC server.
+            var channel = GrpcChannel.ForAddress("http://localhost:5004");
 
-            Console.WriteLine(s);
+            var client = new CurrentConditions.CurrentConditionsClient(channel);
+            var reply = await client.GetCurrentConditionsAsync(new CurrentConditionsRequest(){});
 
-            // AppContext.SetSwitch("System.Net.Http.SocketsHttpHandler.Http2UnencryptedSupport", true);
+            foreach(var r in reply.CurrentConditions)
+            {
+                Console.WriteLine(r.Name + " is " + r.Description);
+            }
+            Console.ReadKey();
 
-            // // The port number(5001) must match the port of the gRPC server.
-            // var channel = GrpcChannel.ForAddress("http://localhost:5004");
             // var client = new Greeter.GreeterClient(channel);
             // var reply = await client.SayHelloAsync(
             //                   new HelloRequest { Name = "GreeterClient" });

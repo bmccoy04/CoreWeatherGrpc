@@ -32,6 +32,7 @@ namespace CoreWeatherGrpc.Worker
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapGrpcService<GreeterService>();
+                endpoints.MapGrpcService<CurrentConditionsService>();
 
                 endpoints.MapGet("/", async context =>
                 {

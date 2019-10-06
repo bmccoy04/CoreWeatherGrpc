@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+option csharp_namespace = "CoreWeatherGrpc.Worker";
+
+package CurrentConditions;
+
+service CurrentConditions {
+  rpc GetCurrentConditions (CurrentConditionsRequest) returns (CurrentConditionsReply);
+  
+	rpc GetCurrentConditionStream(CurrentConditionsRequest) returns (stream CurrentConditionsReply);
+
+  rpc GetCurrentCondition (CurrentConditionRequest) returns (CurrentConditionReply);
+}
+
+message CurrentConditionRequest {
+  int32 planetId = 1;
+}
+
+message CurrentConditionReply {
+  CurrentCondition currentConditions = 1;
+}
+
+message CurrentConditionsRequest {
+}
+
+message CurrentConditionsReply {
+  repeated CurrentCondition currentConditions = 1;
+}
+
+  message CurrentCondition {
+    int32 id = 1;
+    string name = 2;
+    string type = 3;
+    string description = 4;
+    string time = 5;
+    string visibility = 6;
+    string relativeHumidity = 7;
+    string temperature = 8;
+  };
