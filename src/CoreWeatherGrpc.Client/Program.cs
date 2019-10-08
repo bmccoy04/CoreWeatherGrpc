@@ -60,6 +60,8 @@ namespace CoreWeatherGrpc.Client
         {
             public string FirstName { get; set; }
             public string MiddleName { get; set; }
+            // can assign null to premitive types if nullable features are turned on
+            // public string? MiddleName { get; set; } 
             public string LastName { get; set; }
 
             public Person(string first, string last)
