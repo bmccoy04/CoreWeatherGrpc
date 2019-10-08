@@ -25,12 +25,50 @@ namespace CoreWeatherGrpc.Client
             }
             Console.ReadKey();
 
-            // var client = new Greeter.GreeterClient(channel);
-            // var reply = await client.SayHelloAsync(
-            //                   new HelloRequest { Name = "GreeterClient" });
-            // Console.WriteLine("Greeting: " + reply.Message);
-            // Console.WriteLine("Press any key to exit...");
-            // Console.ReadKey();
+            getMiddleName(new Person(){MiddleName = "Foo"});
+
+        }
+
+        static int GetMiddleName(Person person)
+        {
+            return person.MiddleName.length; // With no extra code would throw a warning because MIddle name is not set in constructor
+
+            if (person.MiddleName is null) return 0; // If you put this ahead of person.MiddleName it will get rid of warnings
+
+            return person.MiddleName?.Length ?? 0; // Would get rid of warnings
+
+
+            var middle = person.MiddleName;
+            return (middle!).Length;  // the "Know better operator", turns off null check compiler warnings.
+        }
+
+        static int GetMiddleNameNullPerson(Person? person)
+        {
+            if (person?.MiddleName is null) return 0; // w/o pattern matching
+
+            if(person?.MiddleName is { }) return person.MiddleName.Length; // new pattern to check "is object something"
+
+            if(person?.MiddleName is { } middle) return middle.Length; // can give the "Is object something" a name!
+
+            if(person?.MiddleName is { Length: var length }) return length; // uses pattern matching to dig in and get what you're looking for
+
+            //Finally
+            return person?.MiddleName is { Length: var length} ? length : 0; 
+        }
+
+        public class Person
+        {
+            public string FirstName { get; set; }
+            public string MiddleName { get; set; }
+            public string LastName { get; set; }
+
+            public Person(string first, string last)
+            {
+                FirstName = first;
+                // Middle Name will now have a warning in new VS feataures
+                // have to manual make primitives null or assign values
+                LastName = last;
+            }
         }
     }
 }
