@@ -25,13 +25,13 @@ namespace CoreWeatherGrpc.Client
             }
             Console.ReadKey();
 
-            getMiddleName(new Person(){MiddleName = "Foo"});
+            GetMiddleName(new Person("First", "Last"){MiddleName = "Foo"});
 
         }
 
         static int GetMiddleName(Person person)
         {
-            return person.MiddleName.length; // With no extra code would throw a warning because MIddle name is not set in constructor
+            return person.MiddleName.Length; // With no extra code would throw a warning because MIddle name is not set in constructor
 
             if (person.MiddleName is null) return 0; // If you put this ahead of person.MiddleName it will get rid of warnings
 
@@ -50,10 +50,10 @@ namespace CoreWeatherGrpc.Client
 
             if(person?.MiddleName is { } middle) return middle.Length; // can give the "Is object something" a name!
 
-            if(person?.MiddleName is { Length: var length }) return length; // uses pattern matching to dig in and get what you're looking for
+            if(person?.MiddleName is { Length: var lengthOne }) return lengthOne; // uses pattern matching to dig in and get what you're looking for
 
             //Finally
-            return person?.MiddleName is { Length: var length} ? length : 0; 
+            return person?.MiddleName is { Length: var lengthTwo} ? lengthTwo : 0; 
         }
 
         public class Person
